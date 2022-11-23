@@ -20,6 +20,12 @@ dependencies {
     configurations.implementation.extendsFrom(configurations.extraLibs)
 }
 
+processResources {
+    filesMatching("metadata.json") {
+        expand "version": project.version
+    }
+}
+
 jar {
     from {
         "LICENSE"

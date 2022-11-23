@@ -23,7 +23,7 @@ public class Logger {
         print("----------------------------------------------");
     }
 
-    public static void flush() {
+    public static void clear() {
         try {
             new ProcessBuilder("cmd", "/c", "cls").inheritIO().start().waitFor();
         } catch (InterruptedException | IOException exception) {

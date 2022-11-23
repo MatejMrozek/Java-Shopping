@@ -8,18 +8,14 @@ import java.util.List;
 import java.util.Scanner;
 
 public class ATM {
-    List<Account> accounts = new ArrayList<>();
+    final List<Account> accounts = new ArrayList<>();
 
     Account loggedAccount = null;
 
     public void init() {
-        if (accounts.isEmpty()) {
-            addShowcaseAccounts();
-        }
-
         boolean leaving = false;
         do {
-            Logger.flush();
+            Logger.clear();
 
             if (loggedAccount == null) {
                 Logger.printDivider();
@@ -42,7 +38,7 @@ public class ATM {
 
                 switch (option) {
                     case 1 -> {
-                        Logger.flush();
+                        Logger.clear();
 
                         Logger.printDivider();
                         Logger.print("ATM - Log in");
@@ -67,11 +63,17 @@ public class ATM {
                             } else if (usernameInput.matches("[~!@#$%^&*()_+{}\\[\\]:;,.<>/?\n]")) {
                                 Logger.print("Usernames can't contain special characters, try again.");
                             } else {
+                                boolean invalidAccount = true;
                                 for (Account account : accounts) {
                                     if (account.username.equalsIgnoreCase(usernameInput)) {
                                         selectedAccount = account;
+                                        invalidAccount = false;
                                         break;
                                     }
+                                }
+
+                                if (invalidAccount) {
+                                    Logger.print("Account with this username doesn't exist, try again.");
                                 }
                             }
                         } while (selectedAccount == null);
@@ -108,7 +110,7 @@ public class ATM {
                         Main.sleep(2000);
                     }
                     case 2 -> {
-                        Logger.flush();
+                        Logger.clear();
 
                         Logger.printDivider();
                         Logger.print("ATM - Sign up");
@@ -184,14 +186,14 @@ public class ATM {
                         leaving = true;
                         Main.sleep(2000);
 
-                        Logger.flush();
+                        Logger.clear();
                     }
                     default -> {
                         Logger.print("Invalid input! Try again.");
 
                         Main.sleep(2000);
 
-                        Logger.flush();
+                        Logger.clear();
                     }
                 }
             } else {
@@ -219,7 +221,7 @@ public class ATM {
                 switch (option) {
                     case 1 -> {
                         while (true) {
-                            Logger.flush();
+                            Logger.clear();
 
                             Logger.printDivider();
                             Logger.print("ATM - Withdraw");
@@ -262,7 +264,7 @@ public class ATM {
                     }
                     case 2 -> {
                         while (true) {
-                            Logger.flush();
+                            Logger.clear();
 
                             Logger.printDivider();
                             Logger.print("ATM - Deposit");
@@ -304,7 +306,7 @@ public class ATM {
                         }
                     }
                     case 3 -> {
-                        Logger.flush();
+                        Logger.clear();
 
                         Logger.printDivider();
                         Logger.print("ATM - Send");
@@ -378,7 +380,7 @@ public class ATM {
                         }
                     }
                     case 4 -> {
-                        Logger.flush();
+                        Logger.clear();
 
                         Logger.printDivider();
                         Logger.print("ATM - Log out");
@@ -408,7 +410,7 @@ public class ATM {
 
                             Main.sleep(1500);
 
-                            Logger.flush();
+                            Logger.clear();
                         }
                     }
                     default -> {
@@ -416,16 +418,16 @@ public class ATM {
 
                         Main.sleep(2000);
 
-                        Logger.flush();
+                        Logger.clear();
                     }
                 }
             }
         } while (!leaving);
 
-        Logger.flush();
+        Logger.clear();
     }
 
-    void addShowcaseAccounts() {
+    public void addShowcaseAccounts() {
         Account marioAccount = new Account("Mario", "ItsMeMario123");
         marioAccount.addMoney(37000);
         accounts.add(marioAccount);
@@ -437,5 +439,9 @@ public class ATM {
         Account adamAccount = new Account("Adam", "adamPog123");
         adamAccount.addMoney(53000);
         accounts.add(adamAccount);
+    }
+
+    public List<Account> getAccounts() {
+        return accounts;
     }
 }

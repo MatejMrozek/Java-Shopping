@@ -6,34 +6,38 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Cart {
-    final List<CartProduct> cartProductList;
+    final List<ProductAmount> productAmountList;
 
     public Cart() {
-        this.cartProductList = new ArrayList<>();
+        this.productAmountList = new ArrayList<>();
     }
 
     public int getTotalPrice() {
         int price = 0;
-        for (CartProduct cartProduct : cartProductList) {
-            price += cartProduct.getAmount() * cartProduct.product.price;
+        for (ProductAmount productAmount : productAmountList) {
+            price += productAmount.getAmount() * productAmount.product.price;
         }
 
         return price;
     }
 
     public boolean isEmpty() {
-        return cartProductList.isEmpty();
+        return productAmountList.isEmpty();
     }
 
     public void clear() {
-        cartProductList.clear();
+        productAmountList.clear();
+    }
+
+    public List<ProductAmount> getProducts() {
+        return productAmountList;
     }
 
     public void addProduct(Product product, int amount) {
         boolean isInCart = false;
         int cartProductPosition = 0;
-        for (CartProduct cartProduct : cartProductList) {
-            if (cartProduct.product == product) {
+        for (ProductAmount productAmount : productAmountList) {
+            if (productAmount.product == product) {
                 isInCart = true;
                 break;
             }
@@ -42,17 +46,17 @@ public class Cart {
         }
 
         if (!isInCart) {
-            cartProductList.add(new CartProduct(product, amount));
+            productAmountList.add(new ProductAmount(product, amount));
         } else {
-            cartProductList.get(cartProductPosition).addAmount(amount);
+            productAmountList.get(cartProductPosition).addAmount(amount);
         }
     }
 
     public void removeProduct(Product product, int amount) {
         boolean isInCart = false;
         int cartProductPosition = 0;
-        for (CartProduct cartProduct : cartProductList) {
-            if (cartProduct.product == product) {
+        for (ProductAmount productAmount : productAmountList) {
+            if (productAmount.product == product) {
                 isInCart = true;
                 break;
             }
@@ -64,6 +68,6 @@ public class Cart {
             return;
         }
 
-        cartProductList.get(cartProductPosition).removeAmount(amount);
+        productAmountList.get(cartProductPosition).removeAmount(amount);
     }
 }

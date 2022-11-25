@@ -185,15 +185,11 @@ public class ATM {
 
                         leaving = true;
                         Main.sleep(2000);
-
-                        Logger.clear();
                     }
                     default -> {
                         Logger.print("Invalid input! Try again.");
 
                         Main.sleep(2000);
-
-                        Logger.clear();
                     }
                 }
             } else {
@@ -409,22 +405,16 @@ public class ATM {
                             Logger.print("Successfully logged out.");
 
                             Main.sleep(1500);
-
-                            Logger.clear();
                         }
                     }
                     default -> {
                         Logger.print("Invalid input! Try again.");
 
                         Main.sleep(2000);
-
-                        Logger.clear();
                     }
                 }
             }
         } while (!leaving);
-
-        Logger.clear();
     }
 
     public void addShowcaseAccounts() {

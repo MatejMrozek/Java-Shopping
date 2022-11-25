@@ -5,12 +5,25 @@ import matej.mrozek.shopping.Main;
 import matej.mrozek.shopping.atm.Account;
 import matej.mrozek.shopping.store.cart.Cart;
 import matej.mrozek.shopping.store.cart.ProductAmount;
+import matej.mrozek.shopping.utils.Utils;
 
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 
 public class Store {
+    private static final String[] CASHIER_NAMES = {
+            "Pepa",
+            "Adam",
+            "Vojta"
+    };
+
     final List<Product> products;
 
     final Cart cart;
@@ -24,8 +37,6 @@ public class Store {
         if (products.isEmpty()) {
             loadProducts();
         }
-
-        Logger.clear();
 
         boolean leaving = false;
         do {
@@ -244,6 +255,9 @@ public class Store {
                         if (cart.isEmpty()) {
                             Logger.print("Empty");
                             Logger.print();
+                        } else {
+                            Logger.print("Total for " + cart.getTotalPrice() + "CZK.");
+                            Logger.print();
                         }
 
                         productI++;
@@ -340,7 +354,14 @@ public class Store {
                         exit = true;
                     } else {
                         while (true) {
-                            int totalPrice = cart.getTotalPrice();
+                            int priceWithoutDiscount = cart.getTotalPrice();
+                            int totalPrice;
+                            if (Utils.random(0, 1000) == 666) {
+                                totalPrice = 0;
+                            } else {
+                                totalPrice = priceWithoutDiscount;
+                            }
+
                             Logger.clear();
 
                             Logger.printDivider();
@@ -372,8 +393,16 @@ public class Store {
                                 }
                             }
 
-                            Logger.print();
                             Logger.print("Total for " + totalPrice + "CZK");
+
+                            boolean freeFridge = false;
+                            if (totalPrice == 0) {
+                                Logger.print("You're lucky, you have won your carts content for free.");
+                            } else if (totalPrice > 50000) {
+                                Logger.print("You have won a free fridge because your cart is worth more than 50000CZK.");
+                                freeFridge = true;
+                            }
+
                             Logger.print();
                             Logger.print("1) Pay in cash");
                             Logger.print("2) Pay by card");
@@ -392,7 +421,7 @@ public class Store {
 
                             int savedMoney = 0;
                             DiscountCodes discountCode = null;
-                            if (paymentOption > 0 && paymentOption < 3) {
+                            if (totalPrice > 0 && paymentOption > 0 && paymentOption < 3) {
                                 Logger.print("Enter a discount code (leave blank if you don't have any)? ");
                                 Logger.print();
 
@@ -433,6 +462,14 @@ public class Store {
                                             Main.addOwnedProducts(productAmount);
                                         }
 
+                                        if (freeFridge) {
+                                            for (Product product : products) {
+                                                if (product.name.equals("Fridge")) {
+                                                    Main.addOwnedProducts(new ProductAmount(product, 1));
+                                                }
+                                            }
+                                        }
+
                                         Logger.print("You have paid " + totalPrice + "CZK.");
                                         if (discountCode != null && savedMoney > 0) {
                                             Logger.print("You saved " + savedMoney + "CZK using the code " + discountCode.code + " to get " + discountCode.discountPercentage + "% off in the " + discountCode.productCategory + " category.");
@@ -440,9 +477,9 @@ public class Store {
 
                                         Logger.print("Thanks for you purchase.");
 
-                                        cart.clear();
+                                        printReceipt(false, cart, totalPrice, discountCode, savedMoney, totalPrice == 0, freeFridge);
 
-                                        printReceipt();
+                                        cart.clear();
 
                                         Main.sleep(5000);
                                     }
@@ -527,6 +564,14 @@ public class Store {
                                                     Main.addOwnedProducts(productAmount);
                                                 }
 
+                                                if (freeFridge) {
+                                                    for (Product product : products) {
+                                                        if (product.name.equals("Fridge")) {
+                                                            Main.addOwnedProducts(new ProductAmount(product, 1));
+                                                        }
+                                                    }
+                                                }
+
                                                 Logger.print("You have paid " + totalPrice + "CZK using the account " + account.username + ".");
                                                 if (discountCode != null && savedMoney > 0) {
                                                     Logger.print("You saved " + savedMoney + "CZK using the code " + discountCode.code + " to get " + discountCode.discountPercentage + "% off in the " + discountCode.productCategory + " category.");
@@ -534,9 +579,34 @@ public class Store {
 
                                                 Logger.print("Thanks for you purchase.");
 
-                                                cart.clear();
-
                                                 Main.sleep(5000);
+
+                                                Logger.clear();
+
+                                                Logger.printDivider();
+                                                Logger.print("Store - Card payment");
+                                                Logger.print();
+                                                Logger.print("Do you want a receipt?");
+                                                Logger.print();
+                                                Logger.print("1) Yes");
+                                                Logger.print("Anything else) No");
+                                                Logger.printDivider();
+                                                Logger.print();
+
+                                                int receiptOption;
+                                                String receiptOptionInput = new Scanner(System.in).nextLine();
+                                                Logger.print();
+                                                try {
+                                                    receiptOption = Integer.parseInt(receiptOptionInput);
+                                                } catch (Exception exception) {
+                                                    receiptOption = -1;
+                                                }
+
+                                                if (receiptOption == 1) {
+                                                    printReceipt(true, cart, totalPrice, discountCode, savedMoney, totalPrice == 0, freeFridge);
+                                                }
+
+                                                cart.clear();
                                             }
 
                                             break;
@@ -573,14 +643,83 @@ public class Store {
         } while (!leaving);
     }
 
-    void printReceipt() {
-        //TODO: Receipt printing
+    void printReceipt(boolean cardPayment, Cart cart, int discountedPrice, DiscountCodes discountCode, int savedMoney, boolean free, boolean freeFridge) {
+        String transactionTime = DateTimeFormatter.ofPattern("dd_MM_yyyy HH-mm-ss").format(LocalDateTime.now());
+
+        StringBuilder receiptBuilder = new StringBuilder(Logger.DIVIDER).append("\n");
+        receiptBuilder.append("STORE").append("\n\n");
+
+        int productI = 0;
+        for (ProductCategory productCategory : ProductCategory.values()) {
+            boolean printCategory = true;
+
+            for (ProductAmount productAmount : cart.getProducts()) {
+                if (productAmount.product.productCategory != productCategory) {
+                    continue;
+                }
+
+                productI++;
+
+                if (printCategory) {
+                    receiptBuilder.append("--- ").append(productCategory.toString()).append(" ---").append("\n");
+                    printCategory = false;
+                }
+
+                Product product = productAmount.product;
+                receiptBuilder.append(productI).append(" - ").append(product.name).append(" - ").append(product.price).append("CZK (for each)").append(product.adultOnly ? " (18+)" : "").append("\n");
+                receiptBuilder.append(" ".repeat(String.valueOf(productI).length())).append("   Total ").append(productAmount.getAmount()).append(" for ").append(productAmount.getPrice()).append("CZK").append("\n");
+            }
+
+            if (!printCategory) {
+                receiptBuilder.append("\n");
+            }
+        }
+
+        receiptBuilder.append(cardPayment ? "Paid by card" : "Paid ín cash").append("\n");
+        receiptBuilder.append("Price").append(discountCode != null ? " without discounts" : "").append(": ").append(cart.getTotalPrice()).append(!free && discountCode == null ? "\n\n" : "\n");
+        if (discountCode != null && !free) {
+            receiptBuilder.append("Price with discounts: ").append(discountedPrice).append("\n");
+            receiptBuilder.append("Discount code used: ").append(discountCode.code).append(" (").append(discountCode.productCategory).append(" - ").append(discountCode.discountPercentage).append("% off)").append("\n");
+            receiptBuilder.append("Money saved: ").append(savedMoney).append("\n\n");
+        }
+
+        if (free) {
+            receiptBuilder.append("Free thanks to luck.").append("\n\n");
+        }
+
+        if (freeFridge) {
+            receiptBuilder.append("Free fridge because the price is over 50000CZK").append("\n\n");
+        }
+
+        receiptBuilder.append("FIK: ").append(Utils.random(1000, 9999)).append("\n");
+        receiptBuilder.append("PKN: ").append(Utils.random(100000, 999999)).append("\n\n");
+
+        receiptBuilder.append("Store number: ").append(Utils.random(1, 3)).append("\n");
+        receiptBuilder.append("Cashier name: ").append(CASHIER_NAMES[Utils.random(0, 2)]).append("\n\n");
+
+        String time = transactionTime.replace("_", "/");
+        time = time.replace("_", ":");
+        receiptBuilder.append("Transaction time: ").append(time).append("\n");
+        receiptBuilder.append(Logger.DIVIDER);
+
+        try {
+            String absolutePath = getClass().getProtectionDomain().getCodeSource().getLocation().getPath();
+            absolutePath = absolutePath.substring(0, absolutePath.lastIndexOf("/"));
+            absolutePath = absolutePath.replaceAll("%20"," ");
+            File file = new File(absolutePath, "Store Receipt - " + transactionTime + ".txt");
+            Logger.print(file.getAbsolutePath());
+
+            BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(file));
+            bufferedWriter.write(receiptBuilder.toString());
+            bufferedWriter.close();
+        } catch (IOException ignored) {}
     }
 
     void loadProducts() {
         addProduct(new Product("Apple", 8, ProductCategory.Fruits));
         addProduct(new Product("Vodka", 110, ProductCategory.Alcohol, true));
         addProduct(new Product("iPhone", 25000, ProductCategory.Electronics));
+        addProduct(new Product("Fridge", 14715, ProductCategory.Electronics));
     }
 
     void addProduct(Product product) {

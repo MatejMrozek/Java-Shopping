@@ -3,6 +3,8 @@ package matej.mrozek.shopping;
 import java.io.IOException;
 
 public class Logger {
+    public static final String DIVIDER = "----------------------------------------------";
+
     public static void print(String text, boolean noNewLine) {
         if (noNewLine) {
             System.out.print(text);
@@ -20,7 +22,7 @@ public class Logger {
     }
 
     public static void printDivider() {
-        print("----------------------------------------------");
+        print(DIVIDER);
     }
 
     public static void clear() {

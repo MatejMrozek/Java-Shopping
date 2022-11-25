@@ -41,6 +41,9 @@ public class Store {
 
             if (!cart.isEmpty()) {
                 optionCount++;
+                Logger.print(optionCount + ") Remove products");
+
+                optionCount++;
                 Logger.print(optionCount + ") Payment");
             }
 
@@ -217,7 +220,6 @@ public class Store {
 
                             if (printCategory) {
                                 Logger.print("--- " + productCategory.toString() + " ---");
-                                Logger.print();
                                 printCategory = false;
                             }
 
@@ -243,8 +245,17 @@ public class Store {
                         Logger.print();
                         Logger.print("Yes. =)");
                     }
+
+                    Logger.clear();
                 }
                 case 3 -> {
+                    if (optionCount == 3) {
+                        exit = true;
+                    } else {
+                        //TODO: Remove products from cart.
+                    }
+                }
+                case 4 -> {
                     if (optionCount == 3) {
                         exit = true;
                     } else {
@@ -257,23 +268,22 @@ public class Store {
                             for (ProductCategory productCategory : ProductCategory.values()) {
                                 boolean printCategory = true;
 
-                                int i = 0;
+                                int productI = 0;
                                 for (ProductAmount productAmount : cart.getProducts()) {
                                     if (productAmount.product.productCategory != productCategory) {
                                         continue;
                                     }
-
-                                    i++;
 
                                     if (printCategory) {
                                         Logger.print("--- " + productCategory.toString() + " ---");
                                         printCategory = false;
                                     }
 
+                                    productI++;
                                     Product product = productAmount.product;
-                                    Logger.print(i + " - " + product.name + " - " + product.price + "CZK (for each)" + (product.adultOnly ? " (18+)" : ""));
+                                    Logger.print(productI + " - " + product.name + " - " + product.price + "CZK (for each)" + (product.adultOnly ? " (18+)" : ""));
                                     if (productAmount.getAmount() > 1) {
-                                        Logger.print(" ".repeat(String.valueOf(i).length()) + "   Total " + productAmount.getAmount() + " for " + productAmount.getPrice() + "CZK");
+                                        Logger.print(" ".repeat(String.valueOf(productI).length()) + "   Total " + productAmount.getAmount() + " for " + productAmount.getPrice() + "CZK");
                                     }
                                 }
                             }
@@ -312,7 +322,7 @@ public class Store {
                                         }
 
                                         cart.clear();
-                                        
+
                                         Logger.print("You have paid " + cart.getTotalPrice() + "CZK.");
                                         Logger.print("Thanks for you purchase.");
 
@@ -401,7 +411,7 @@ public class Store {
 
                                                 cart.clear();
 
-                                                Logger.print("You have paid " + cart.getTotalPrice() + "CZK usign the account " + account.username + ".");
+                                                Logger.print("You have paid " + cart.getTotalPrice() + "CZK using the account " + account.username + ".");
                                             }
 
                                             break;
@@ -421,13 +431,7 @@ public class Store {
                         }
                     }
                 }
-                case 4 -> {
-                    if (optionCount == 4) {
-                        exit = true;
-                    } else {
-                        invalid = true;
-                    }
-                }
+                case 5 -> exit = true;
                 default -> invalid = true;
             }
 

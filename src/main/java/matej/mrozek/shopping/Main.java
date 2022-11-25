@@ -48,6 +48,7 @@ public class Main {
                 case 1 -> ATM.init();
                 case 2 -> STORE.init();
                 case 3 -> {
+                    Logger.print();
                     Logger.print("Exiting...");
 
                     sleep(1000);

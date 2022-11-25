@@ -114,6 +114,18 @@ public class Store {
                                     Logger.print("Store - " + selectedCategory.toString());
                                     Logger.print();
 
+                                    boolean printed = false;
+                                    for (DiscountCodes discountCode : DiscountCodes.values()) {
+                                        if (selectedCategory == discountCode.productCategory) {
+                                            Logger.print("Enter the code \"" + discountCode.code + "\" on checkout to get " + discountCode.discountPercentage + "% off!");
+                                            printed = true;
+                                        }
+                                    }
+
+                                    if (printed) {
+                                        Logger.print();
+                                    }
+
                                     int optionAmount2 = 0;
                                     for (Product product : products) {
                                         if (product.productCategory != selectedCategory) {
@@ -328,6 +340,7 @@ public class Store {
                         exit = true;
                     } else {
                         while (true) {
+                            int totalPrice = cart.getTotalPrice();
                             Logger.clear();
 
                             Logger.printDivider();
@@ -351,14 +364,16 @@ public class Store {
                                     productI++;
                                     Product product = productAmount.product;
                                     Logger.print(productI + " - " + product.name + " - " + product.price + "CZK (for each)" + (product.adultOnly ? " (18+)" : ""));
-                                    if (productAmount.getAmount() > 1) {
-                                        Logger.print(" ".repeat(String.valueOf(productI).length()) + "   Total " + productAmount.getAmount() + " for " + productAmount.getPrice() + "CZK");
-                                    }
+                                    Logger.print(" ".repeat(String.valueOf(productI).length()) + "   Total " + productAmount.getAmount() + " for " + productAmount.getPrice() + "CZK");
+                                }
+
+                                if (!printCategory) {
+                                    Logger.print();
                                 }
                             }
 
                             Logger.print();
-                            Logger.print("Total for " + cart.getTotalPrice() + "CZK");
+                            Logger.print("Total for " + totalPrice + "CZK");
                             Logger.print();
                             Logger.print("1) Pay in cash");
                             Logger.print("2) Pay by card");
@@ -375,29 +390,61 @@ public class Store {
                                 paymentOption = -1;
                             }
 
+                            int savedMoney = 0;
+                            DiscountCodes discountCode = null;
+                            if (paymentOption > 0 && paymentOption < 3) {
+                                Logger.print("Enter a discount code (leave blank if you don't have any)? ");
+                                Logger.print();
+
+                                String discountCodeInput = new Scanner(System.in).nextLine();
+                                Logger.print();
+
+                                for (DiscountCodes discountCode2 : DiscountCodes.values()) {
+                                    if (discountCodeInput.equals(discountCode2.code)) {
+                                        discountCode = discountCode2;
+
+                                        int categoryPrice = 0;
+                                        for (ProductAmount productAmount : cart.getProducts()) {
+                                            if (productAmount.product.productCategory == discountCode2.productCategory) {
+                                                categoryPrice += productAmount.getPrice();
+                                            }
+                                        }
+
+                                        savedMoney = discountCode.getDiscount(categoryPrice);
+                                        totalPrice -= savedMoney;
+
+                                        break;
+                                    }
+                                }
+                            }
+
                             boolean goBack = true;
                             switch (paymentOption) {
                                 case 1 ->  {
-                                    if (Main.getPurse() - cart.getTotalPrice() < 0) {
-                                        Logger.print("You don't have enough money to pay " + cart.getTotalPrice() + "CZK.");
+                                    if (Main.getPurse() - totalPrice < 0) {
+                                        Logger.print("You don't have enough money to pay " + totalPrice + "CZK.");
 
                                         Main.sleep(2000);
 
                                         goBack = false;
                                     } else {
-                                        Main.removePurse(cart.getTotalPrice());
+                                        Main.removePurse(totalPrice);
                                         for (ProductAmount productAmount : cart.getProducts()) {
                                             Main.addOwnedProducts(productAmount);
                                         }
 
-                                        Logger.print("You have paid " + cart.getTotalPrice() + "CZK.");
+                                        Logger.print("You have paid " + totalPrice + "CZK.");
+                                        if (discountCode != null && savedMoney > 0) {
+                                            Logger.print("You saved " + savedMoney + "CZK using the code " + discountCode.code + " to get " + discountCode.discountPercentage + "% off in the " + discountCode.productCategory + " category.");
+                                        }
+
                                         Logger.print("Thanks for you purchase.");
 
                                         cart.clear();
 
                                         printReceipt();
 
-                                        Main.sleep(1500);
+                                        Main.sleep(5000);
                                     }
                                 }
                                 case 2 -> {
@@ -470,21 +517,26 @@ public class Store {
 
                                     for (Account account : Main.getATM().getAccounts()) {
                                         if (account == selectedAccount) {
-                                            if (account.getBalance() - cart.getTotalPrice() < 0) {
+                                            if (account.getBalance() - totalPrice < 0) {
                                                 Logger.print("There is not enough money on the account " + account.username + ".");
 
                                                 Main.sleep(2000);
                                             } else {
-                                                account.removeMoney(cart.getTotalPrice());
+                                                account.removeMoney(totalPrice);
                                                 for (ProductAmount productAmount : cart.getProducts()) {
                                                     Main.addOwnedProducts(productAmount);
                                                 }
 
-                                                Logger.print("You have paid " + cart.getTotalPrice() + "CZK using the account " + account.username + ".");
+                                                Logger.print("You have paid " + totalPrice + "CZK using the account " + account.username + ".");
+                                                if (discountCode != null && savedMoney > 0) {
+                                                    Logger.print("You saved " + savedMoney + "CZK using the code " + discountCode.code + " to get " + discountCode.discountPercentage + "% off in the " + discountCode.productCategory + " category.");
+                                                }
+
+                                                Logger.print("Thanks for you purchase.");
 
                                                 cart.clear();
 
-                                                Main.sleep(1500);
+                                                Main.sleep(5000);
                                             }
 
                                             break;

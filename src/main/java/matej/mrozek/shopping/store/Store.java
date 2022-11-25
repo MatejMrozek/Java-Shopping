@@ -688,7 +688,7 @@ public class Store {
         }
 
         if (freeFridge) {
-            receiptBuilder.append("Free fridge because the price is over 50000CZK").append("\n\n");
+            receiptBuilder.append("Free fridge because the price is over 50000CZK.").append("\n\n");
         }
 
         receiptBuilder.append("FIK: ").append(Utils.random(1000, 9999)).append("\n");

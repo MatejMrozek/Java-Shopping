@@ -20,6 +20,7 @@ public class Main {
         ATM.addShowcaseAccounts();
 
         while (true) {
+            Logger.clear();
             Logger.printDivider();
             Logger.print("Square");
             Logger.print();
@@ -33,6 +34,7 @@ public class Main {
 
             int option;
             String optionInput = new Scanner(System.in).nextLine();
+            Logger.print();
             try {
                 option = Integer.parseInt(optionInput);
             } catch (Exception exception) {
@@ -40,15 +42,25 @@ public class Main {
 
                 sleep(2000);
 
-                Logger.clear();
                 continue;
             }
 
             switch (option) {
-                case 1 -> ATM.init();
-                case 2 -> STORE.init();
+                case 1 -> {
+                    Logger.print("Going to the ATM...");
+
+                    sleep(1500);
+
+                    ATM.init();
+                }
+                case 2 -> {
+                    Logger.print("Going to the store...");
+
+                    sleep(1500);
+
+                    STORE.init();
+                }
                 case 3 -> {
-                    Logger.print();
                     Logger.print("Exiting...");
 
                     sleep(1000);

@@ -29,6 +29,7 @@ public class Store {
 
         boolean leaving = false;
         do {
+            Logger.clear();
             Logger.printDivider();
             Logger.print("Store");
             Logger.print();
@@ -40,9 +41,6 @@ public class Store {
             Logger.print(optionCount + ") Cart" + (cart.isEmpty() ? " (empty)" : ""));
 
             if (!cart.isEmpty()) {
-                optionCount++;
-                Logger.print(optionCount + ") Remove products");
-
                 optionCount++;
                 Logger.print(optionCount + ") Payment");
             }
@@ -78,6 +76,8 @@ public class Store {
                             Logger.print(optionAmount + ") " + productCategory.toString());
                         }
 
+                        Logger.print();
+
                         optionAmount++;
                         Logger.print(optionAmount + ") Go back");
                         Logger.printDivider();
@@ -94,7 +94,6 @@ public class Store {
 
                         if (categoryOption > 0) {
                             if (categoryOption >= optionAmount) {
-                                Logger.clear();
                                 break;
                             } else {
                                 ProductCategory selectedCategory = null;
@@ -125,6 +124,8 @@ public class Store {
                                         Logger.print(optionAmount2 + ") " + product.name + " - " + product.price + "CZK" + (product.adultOnly ? " (18+)" : ""));
                                     }
 
+                                    Logger.print();
+
                                     optionAmount2++;
                                     Logger.print(optionAmount2 + ") Go back");
                                     Logger.printDivider();
@@ -140,8 +141,7 @@ public class Store {
                                     }
 
                                     if (productOption > 0) {
-                                        if (productOption >= optionAmount2) {
-                                            Logger.clear();
+                                        if (productOption == optionAmount2) {
                                             break;
                                         } else {
                                             int productI = 0;
@@ -170,11 +170,10 @@ public class Store {
                                                         } else if (productAmount > 0) {
                                                             cart.addProduct(product, productAmount);
 
-                                                            Logger.print("Successfully added " + productAmount + " " + product.name + "s to your shopping cart.");
+                                                            Logger.print("Successfully added " + productAmount + " " + product.name + (productAmount > 1 ? "s" : "") + " to your shopping cart.");
+
                                                             Main.sleep(1500);
                                                         }
-
-                                                        Logger.clear();
 
                                                         break;
                                                     }
@@ -187,8 +186,6 @@ public class Store {
                                         Logger.print("Invalid input! Try again.");
 
                                         Main.sleep(2000);
-
-                                        Logger.clear();
                                     }
                                 }
                             }
@@ -196,71 +193,143 @@ public class Store {
                             Logger.print("Invalid input! Try again.");
 
                             Main.sleep(2000);
-
-                            Logger.clear();
                         }
                     }
                 }
                 case 2 -> {
-                    Logger.clear();
-                    Logger.printDivider();
-                    Logger.print("Store - Cart");
-                    Logger.print();
+                    while (true){
+                        Logger.clear();
+                        Logger.printDivider();
+                        Logger.print("Store - Cart");
+                        Logger.print();
 
-                    for (ProductCategory productCategory : ProductCategory.values()) {
-                        boolean printCategory = true;
+                        int productI = 0;
+                        for (ProductCategory productCategory : ProductCategory.values()) {
+                            boolean printCategory = true;
 
-                        int i = 0;
-                        for (ProductAmount productAmount : cart.getProducts()) {
-                            if (productAmount.product.productCategory != productCategory) {
-                                continue;
+                            for (ProductAmount productAmount : cart.getProducts()) {
+                                if (productAmount.product.productCategory != productCategory) {
+                                    continue;
+                                }
+
+                                productI++;
+
+                                if (printCategory) {
+                                    Logger.print("--- " + productCategory.toString() + " ---");
+                                    printCategory = false;
+                                }
+
+                                Product product = productAmount.product;
+                                Logger.print(productI + ") " + product.name + " - " + product.price + "CZK (for each)" + (product.adultOnly ? " (18+)" : ""));
+                                Logger.print(" ".repeat(String.valueOf(productI).length()) + "  Total " + productAmount.getAmount() + " for " + productAmount.getPrice() + "CZK");
                             }
 
-                            i++;
-
-                            if (printCategory) {
-                                Logger.print("--- " + productCategory.toString() + " ---");
-                                printCategory = false;
-                            }
-
-                            Product product = productAmount.product;
-                            Logger.print(i + " - " + product.name + " - " + product.price + "CZK (for each)" + (product.adultOnly ? " (18+)" : ""));
-                            if (productAmount.getAmount() > 1) {
-                                Logger.print(" ".repeat(String.valueOf(i).length()) + "   Total " + productAmount.getAmount() + " for " + productAmount.getPrice() + "CZK");
+                            if (!printCategory) {
+                                Logger.print();
                             }
                         }
-                    }
 
-                    if (cart.isEmpty()) {
-                        Logger.print("Empty");
-                    }
+                        if (cart.isEmpty()) {
+                            Logger.print("Empty");
+                            Logger.print();
+                        }
 
-                    Logger.print();
-                    Logger.print("Enter anything to go back.");
-                    Logger.printDivider();
-                    Logger.print();
-
-                    String discard = new Scanner(System.in).nextLine();
-                    if (discard.equals("no")) {
+                        productI++;
+                        Logger.print(productI + ") Go back.");
+                        Logger.printDivider();
                         Logger.print();
-                        Logger.print("Yes. =)");
-                    }
 
-                    Logger.clear();
+                        int removeOption;
+                        String removeOptionInput = new Scanner(System.in).nextLine();
+                        Logger.print();
+                        try {
+                            removeOption = Integer.parseInt(removeOptionInput);
+                        } catch (Exception exception) {
+                            removeOption = -1;
+                        }
+
+                        boolean goBack = false;
+                        if (removeOption > 0) {
+                            if (removeOption == productI) {
+                                goBack = true;
+                            } else {
+                                int productI2 = 0;
+                                for (ProductCategory productCategory : ProductCategory.values()) {
+                                    boolean end = false;
+                                    for (ProductAmount productAmount : cart.getProducts()) {
+                                        if (productAmount.product.productCategory != productCategory) {
+                                            continue;
+                                        }
+
+                                        productI2++;
+                                        if (productI2 == removeOption) {
+                                            int removeAmount = 1;
+                                            if (productAmount.getAmount() > 1) {
+                                                Logger.print("How many " + productAmount.product.name + "s do you want to remove (" + productAmount.getAmount() + " in cart, 0 to go back)? ", true);
+
+                                                String removeAmountInput = new Scanner(System.in).nextLine();
+                                                Logger.print();
+                                                try {
+                                                    removeAmount = Integer.parseInt(removeAmountInput);
+                                                } catch (Exception exception) {
+                                                    removeAmount = -1;
+                                                }
+                                            }
+
+                                            if (removeAmount == 0) {
+                                                break;
+                                            } else if (removeAmount > 0 && productAmount.getAmount() - removeAmount >= 0) {
+                                                int productAmountI = -1;
+                                                for (ProductAmount productAmount2 : cart.getProducts()) {
+                                                    productAmountI++;
+                                                    if (productAmount2 == productAmount) {
+                                                        if (productAmount2.getAmount() - removeAmount == 0) {
+                                                            cart.getProducts().remove(productAmountI);
+                                                        } else {
+                                                            productAmount2.removeAmount(removeAmount);
+                                                        }
+
+                                                        break;
+                                                    }
+                                                }
+
+                                                Logger.print("Successfully removed " + removeAmount + " " + productAmount.product.name + (productAmount.getAmount() > 1 ? "s" : "") + " from your cart.");
+
+                                                Main.sleep(1500);
+                                            } else {
+                                                Logger.print("Invalid input! Try again.");
+
+                                                Main.sleep(2000);
+                                            }
+
+                                            end = true;
+                                            break;
+                                        }
+                                    }
+
+                                    if (end) {
+                                        break;
+                                    }
+                                }
+                            }
+                        } else {
+                            Logger.print("Invalid input! Try again.");
+
+                            Main.sleep(2000);
+                        }
+
+                        if (goBack) {
+                            break;
+                        }
+                    }
                 }
                 case 3 -> {
                     if (optionCount == 3) {
                         exit = true;
                     } else {
-                        //TODO: Remove products from cart.
-                    }
-                }
-                case 4 -> {
-                    if (optionCount == 3) {
-                        exit = true;
-                    } else {
                         while (true) {
                             Logger.clear();
+
                             Logger.printDivider();
                             Logger.print("Store - Payment");
                             Logger.print();
@@ -321,10 +390,10 @@ public class Store {
                                             Main.addOwnedProducts(productAmount);
                                         }
 
-                                        cart.clear();
-
                                         Logger.print("You have paid " + cart.getTotalPrice() + "CZK.");
                                         Logger.print("Thanks for you purchase.");
+
+                                        cart.clear();
 
                                         printReceipt();
 
@@ -403,29 +472,28 @@ public class Store {
                                         if (account == selectedAccount) {
                                             if (account.getBalance() - cart.getTotalPrice() < 0) {
                                                 Logger.print("There is not enough money on the account " + account.username + ".");
+
+                                                Main.sleep(2000);
                                             } else {
                                                 account.removeMoney(cart.getTotalPrice());
                                                 for (ProductAmount productAmount : cart.getProducts()) {
                                                     Main.addOwnedProducts(productAmount);
                                                 }
 
+                                                Logger.print("You have paid " + cart.getTotalPrice() + "CZK using the account " + account.username + ".");
+
                                                 cart.clear();
 
-                                                Logger.print("You have paid " + cart.getTotalPrice() + "CZK using the account " + account.username + ".");
+                                                Main.sleep(1500);
                                             }
 
                                             break;
                                         }
                                     }
-
-                                    Main.sleep(2000);
-
-                                    Logger.clear();
                                 }
                             }
 
                             if (goBack) {
-                                Logger.clear();
                                 break;
                             }
                         }
@@ -449,12 +517,8 @@ public class Store {
                 Logger.print("Invalid input! Try again.");
 
                 Main.sleep(2000);
-
-                Logger.clear();
             }
         } while (!leaving);
-
-        Logger.clear();
     }
 
     void printReceipt() {

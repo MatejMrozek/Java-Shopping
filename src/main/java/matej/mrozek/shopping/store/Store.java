@@ -676,9 +676,9 @@ public class Store {
         }
 
         receiptBuilder.append(cardPayment ? "Paid by card" : "Paid ín cash").append("\n");
-        receiptBuilder.append("Price").append(discountCode != null ? " without discounts" : "").append(": ").append(cart.getTotalPrice()).append(!free && discountCode == null ? "\n\n" : "\n");
+        receiptBuilder.append("Price").append(discountCode != null ? " without discount" : "").append(": ").append(cart.getTotalPrice()).append(!free && discountCode == null ? "\n\n" : "\n");
         if (discountCode != null && !free) {
-            receiptBuilder.append("Price with discounts: ").append(discountedPrice).append("\n");
+            receiptBuilder.append("Price with discount: ").append(discountedPrice).append("\n");
             receiptBuilder.append("Discount code used: ").append(discountCode.code).append(" (").append(discountCode.productCategory).append(" - ").append(discountCode.discountPercentage).append("% off)").append("\n");
             receiptBuilder.append("Money saved: ").append(savedMoney).append("\n\n");
         }
@@ -695,6 +695,7 @@ public class Store {
         receiptBuilder.append("PKN: ").append(Utils.random(100000, 999999)).append("\n\n");
 
         receiptBuilder.append("Store number: ").append(Utils.random(1, 3)).append("\n");
+        receiptBuilder.append("Cash register: ").append(Utils.random(1, 5)).append("\n");
         receiptBuilder.append("Cashier name: ").append(CASHIER_NAMES[Utils.random(0, 2)]).append("\n\n");
 
         String time = transactionTime.replace("_", "/");

@@ -418,6 +418,10 @@ public class ATM {
     }
 
     public void addShowcaseAccounts() {
+        Account vojtaAccount = new Account("Vojta", "NovaciJsouDva123");
+        vojtaAccount.addMoney(666000);
+        accounts.add(vojtaAccount);
+
         Account marioAccount = new Account("Mario", "ItsMeMario123");
         marioAccount.addMoney(37000);
         accounts.add(marioAccount);

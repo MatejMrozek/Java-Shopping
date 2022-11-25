@@ -698,7 +698,7 @@ public class Store {
         receiptBuilder.append("Cashier name: ").append(CASHIER_NAMES[Utils.random(0, 2)]).append("\n\n");
 
         String time = transactionTime.replace("_", "/");
-        time = time.replace("_", ":");
+        time = time.replace("-", ":");
         receiptBuilder.append("Transaction time: ").append(time).append("\n");
         receiptBuilder.append(Logger.DIVIDER);
 

@@ -708,7 +708,6 @@ public class Store {
             absolutePath = absolutePath.substring(0, absolutePath.lastIndexOf("/"));
             absolutePath = absolutePath.replaceAll("%20"," ");
             File file = new File(absolutePath, "Store Receipt - " + transactionTime + ".txt");
-            Logger.print(file.getAbsolutePath());
 
             BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(file));
             bufferedWriter.write(receiptBuilder.toString());

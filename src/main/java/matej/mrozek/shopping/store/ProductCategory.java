@@ -2,6 +2,8 @@ package matej.mrozek.shopping.store;
 
 public enum ProductCategory {
     Fruits("Fruits"),
+    Vegetables("Vegetables"),
+    Pastry("Pastry"),
     Alcohol("Alcohol"),
     Electronics("Electronics");
 

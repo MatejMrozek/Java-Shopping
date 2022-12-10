@@ -717,7 +717,15 @@ public class Store {
 
     void loadProducts() {
         addProduct(new Product("Apple", 8, ProductCategory.Fruits));
+        addProduct(new Product("Pear", 9, ProductCategory.Fruits));
+
+        addProduct(new Product("Carrot", 11, ProductCategory.Vegetables));
+
+        addProduct(new Product("Bread", 34, ProductCategory.Pastry));
+
         addProduct(new Product("Vodka", 110, ProductCategory.Alcohol, true));
+        addProduct(new Product("Beer", 35, ProductCategory.Alcohol, true));
+
         addProduct(new Product("iPhone", 25000, ProductCategory.Electronics));
         addProduct(new Product("Fridge", 14715, ProductCategory.Electronics));
     }
